@@ -1,0 +1,60 @@
+plugins {
+    id 'java'
+}
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+repositories {
+    mavenCentral()
+}
+
+// Page objects, tests and the runner all live in the main source set, so a suite can be
+// started with a plain JavaExec on the runtime classpath.
+sourceSets {
+    main.java.srcDirs = ['src']
+}
+
+task startTests(type: JavaExec) {
+    group = 'verification'
+    description = 'Runs a TestNG suite on a device: -Ppom.testNGxml=<suite> -Ppom.env=<config>'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'tools.testng.RunMobileTestsCmd'
+
+    // every -Ppom.* property reaches the test JVM as a system property of the same name
+    project.properties.findAll { it.key.startsWith('pom.') }.each { key, value ->
+        systemProperty key, value
+    }
+
+    if (project.hasProperty('pom.testNGxml')) {
+        args "--testNGXml=${project.property('pom.testNGxml')}"
+    }
+    if (project.hasProperty('pom.env')) {
+        args "--env=${project.property('pom.env')}"
+    }
+    if ((project.hasProperty('pom.debug') && project.property('pom.debug').toString() != 'false')
+            || project.gradle.startParameter.logLevel.name() == 'DEBUG') {
+        args "--debug"
+    }
+    if (project.hasProperty('pom.selfHealing')) {
+        args "--selfHealing=${project.property('pom.selfHealing')}"
+    }
+}
+
+dependencies {
+    // for @Nonnull/@Nullable
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    implementation 'commons-io:commons-io:2.11.0!!'
+    implementation 'org.apache.commons:commons-lang3:3.15.0!!'
+    // self-healing locators: request/response JSON for the Claude API
+    implementation 'com.google.code.gson:gson:2.10.1!!'
+    // following 3 libraries are needed for successfully starting testNG framework
+    implementation 'org.testng:testng:7.10.2'
+    implementation 'org.slf4j:slf4j-api:2.0.13!!'
+    implementation 'org.slf4j:slf4j-simple:2.0.13!!'
+    // appium dependencies
+    implementation 'io.appium:java-client:10.1.1'
+    implementation 'org.seleniumhq.selenium:selenium-api:4.42.0!!'
+    implementation 'org.seleniumhq.selenium:selenium-remote-driver:4.42.0!!'
+    implementation 'org.seleniumhq.selenium:selenium-support:4.42.0!!'
+}

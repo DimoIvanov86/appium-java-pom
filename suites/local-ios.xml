@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- iOS: "udid" is the device or simulator UDID (xcrun xctrace list devices). The WebDriverAgent
+     port is derived from the UDID, so no port is needed. -->
+<suite name="ios-local" parallel="tests" thread-count="4">
+    <parameter name="config" value="config/config.properties"/>
+
+    <test name="ios-device-1">
+        <parameter name="udid" value="REPLACE-WITH-DEVICE-UDID"/>
+        <parameter name="deviceName" value="iPhone"/>
+        <classes>
+            <class name="tests.ios.search.IOSSearchTests">
+                <methods>
+                    <include name="searchOpensArticle"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+</suite>
